@@ -1,0 +1,32 @@
+{
+  "name": "niklongstone/talker",
+  "description": "Talker allows you to call class method via natural language",
+  "keywords": ["narual language", "php", "gherkin", "method", "parser", "regular expression", "regex"],
+  "homepage": "http://github.com/niklongstone/talker",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Nicola Pietroluongo",
+      "email": "nik.longstone@gmail.com",
+      "homepage": "http://nicolapietroluongo.com"
+    }
+  ],
+  "require-dev": {
+    "phpunit/phpunit": "~4.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Talker\\": "src/Talker/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Talker\\Test\\": "tests/Talker/"
+    }
+  },
+  "config": {
+    "bin-dir": "bin"
+  }
+}
+
