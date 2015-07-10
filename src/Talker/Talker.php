@@ -25,6 +25,7 @@ class Talker
     public function __construct($resource)
     {
         $this->resource = $resource;
+        $this->resourceMethods = $this->getMethods();
     }
 
     public function setParser(ResourceParserInterface $resourceParser)
@@ -34,9 +35,38 @@ class Talker
 
     public function call($phrase)
     {
-        foreach ($this->$parsers as $parser) {
-            $method = $parser->parse($phrase, $this->resource);
-            if ($method instanceOf Method) break;
+        foreach ($this->parsers as $parser) {
+            foreach($this->resourceMethods as $methodName)
+            $parsedMethod = $parser->parse($methodName);
+
+            return $this->guessMatch($phrase, $parsedMethod);
         }
+
+        return false;
+    }
+
+    private function getMethods()
+    {
+        try {
+            $reflection = new \ReflectionClass($this->resource);
+        } catch(\ReflectionException $e) {
+            throw new \Exception($e->getMessage());
+        }
+        $methods = $reflection->getMethods();
+        array_walk(
+            $methods,
+            function (&$v) {
+                $v = $v->getName();
+            }
+        );
+
+        return $methods;
+    }
+
+    private function guessMatch($source, $context)
+    {
+        $context = implode(' ', $context);
+
+        return ($source == $context);
     }
 }

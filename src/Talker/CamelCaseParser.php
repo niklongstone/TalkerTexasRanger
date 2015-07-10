@@ -10,7 +10,14 @@
 
 namespace Talker;
 
-interface ResourceParserInterface
+
+class CamelCaseParser implements ResourceParserInterface
 {
-    public function parse($resource);
+    public function parse($resource)
+    {
+        $pattern = '/([a-z]+)|([A-Z]{1}[a-z]*)/';
+        preg_match_all($pattern, $resource, $matches);
+
+        return $matches[0];
+    }
 }
