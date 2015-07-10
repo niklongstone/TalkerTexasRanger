@@ -45,7 +45,7 @@ class Talker
         return false;
     }
 
-    private function getMethods()
+    public function getMethods()
     {
         try {
             $reflection = new \ReflectionClass($this->resource);
@@ -61,6 +61,25 @@ class Talker
         );
 
         return $methods;
+    }
+
+    public function getParameters($method)
+    {
+        try {
+            $reflectionMethod = new \ReflectionMethod($this->resource, $method);
+            //$reflection = new \ReflectionParameter(array($this->resource, $method));
+        } catch(\ReflectionException $e) {
+            throw new \Exception($e->getMessage());
+        }
+        $params = $reflectionMethod->getParameters();
+        array_walk(
+            $params,
+            function (&$v) {
+                $v = $v->getName();
+            }
+        );
+
+        return $params;
     }
 
     private function guessMatch($source, $context)

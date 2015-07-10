@@ -10,7 +10,6 @@
 
 namespace Talker;
 
-
 class CamelCaseParser implements ResourceParserInterface
 {
     public function parse($resource)

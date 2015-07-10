@@ -10,8 +10,7 @@
 
 namespace Talker;
 
-
-class Method 
+class Method
 {
     /**
      * @var string

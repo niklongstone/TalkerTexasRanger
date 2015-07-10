@@ -3,9 +3,8 @@
 
 namespace Talker\Test\Fixtures;
 
-
 class TestClass {
-    public function testMethod()
+    public function testMethod($first, $second)
     {
 
     }
