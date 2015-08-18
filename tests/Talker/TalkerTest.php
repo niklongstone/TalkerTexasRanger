@@ -11,6 +11,7 @@
 namespace Talker\Test;
 
 use Talker\CamelCaseParser;
+use Talker\Method;
 use Talker\Talker;
 
 class TalkerTest extends \PHPUnit_Framework_TestCase
@@ -22,16 +23,17 @@ class TalkerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetMethods()
     {
-        $talker = new Talker('Talker\Test\Fixtures\TestClass');
+        $class = 'Talker\Test\Fixtures\TestClass';
+        $talker = new Talker($class);
+        $methodA = new Method();
+        $methodA->setName('testMethod');
+        $methodA->setParameters(array('first', 'second'));
 
-        $this->assertEquals(array('testMethod'), $talker->getMethods());
-    }
+        $methodB = new Method();
+        $methodB->setName('testMethodB');
+        $methodB->setParameters(array('firstB', 'secondB'));
 
-    public function testGetParameters()
-    {
-        $talker = new Talker('Talker\Test\Fixtures\TestClass');
-
-        $this->assertEquals(array('first', 'second'), $talker->getParameters('testMethod'));
+        $this->assertEquals(array($methodA,$methodB), $talker->getMethods($class));
     }
 
     public function testCall()

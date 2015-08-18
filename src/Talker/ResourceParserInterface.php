@@ -12,5 +12,10 @@ namespace Talker;
 
 interface ResourceParserInterface
 {
+    /**
+     * @param string $resource
+     *
+     * @return array
+     */
     public function parse($resource);
 }

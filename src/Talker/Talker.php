@@ -25,7 +25,7 @@ class Talker
     public function __construct($resource)
     {
         $this->resource = $resource;
-        $this->resourceMethods = $this->getMethods();
+        $this->resourceMethods = $this->getMethods($resource);
     }
 
     public function setParser(ResourceParserInterface $resourceParser)
@@ -36,50 +36,45 @@ class Talker
     public function call($phrase)
     {
         foreach ($this->parsers as $parser) {
-            foreach($this->resourceMethods as $methodName)
-            $parsedMethod = $parser->parse($methodName);
+            foreach ($this->resourceMethods as $method) {
+                $parsedMethod = $parser->parse($method->getName());
+                if ($this->guessMatch($phrase, $parsedMethod)) {
 
-            return $this->guessMatch($phrase, $parsedMethod);
+                    return true;
+                }
+            }
         }
 
         return false;
     }
 
-    public function getMethods()
+    public function getMethods($resource)
     {
         try {
-            $reflection = new \ReflectionClass($this->resource);
-        } catch(\ReflectionException $e) {
+            $reflection = new \ReflectionClass($resource);
+        } catch (\ReflectionException $e) {
             throw new \Exception($e->getMessage());
         }
-        $methods = $reflection->getMethods();
-        array_walk(
-            $methods,
-            function (&$v) {
-                $v = $v->getName();
-            }
-        );
 
-        return $methods;
+        return $this->getMethodsList($reflection->getMethods());
     }
 
-    public function getParameters($method)
+    protected function getMethodsList($reflectionMethods)
     {
-        try {
-            $reflectionMethod = new \ReflectionMethod($this->resource, $method);
-            //$reflection = new \ReflectionParameter(array($this->resource, $method));
-        } catch(\ReflectionException $e) {
-            throw new \Exception($e->getMessage());
-        }
-        $params = $reflectionMethod->getParameters();
         array_walk(
-            $params,
+            $reflectionMethods,
             function (&$v) {
-                $v = $v->getName();
+                $methodClass = new Method();
+                $methodClass->setName($v->getName());
+                foreach ($v->getParameters() as $reflectionParameter) {
+                    $parametersName[] = $reflectionParameter->getName();
+                }
+                $methodClass->setParameters($parametersName);
+                $v = $methodClass;
             }
         );
 
-        return $params;
+        return $reflectionMethods;
     }
 
     private function guessMatch($source, $context)

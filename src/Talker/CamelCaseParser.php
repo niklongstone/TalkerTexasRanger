@@ -10,8 +10,19 @@
 
 namespace Talker;
 
+/**
+ * Class CamelCaseParser.
+ *
+ * Creates a single string from a camel case one.
+ * example: 'firstSecond' will give array('first', 'second');
+ *
+ * @package Talker
+ */
 class CamelCaseParser implements ResourceParserInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public function parse($resource)
     {
         $pattern = '/([a-z]+)|([A-Z]{1}[a-z]*)/';
