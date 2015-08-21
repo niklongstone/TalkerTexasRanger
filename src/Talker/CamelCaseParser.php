@@ -18,7 +18,7 @@ namespace Talker;
  *
  * @package Talker
  */
-class CamelCaseParser implements ResourceParserInterface
+final class CamelCaseParser implements ResourceParserInterface
 {
     /**
      * {@inheritdoc}

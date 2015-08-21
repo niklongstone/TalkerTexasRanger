@@ -10,7 +10,7 @@
 
 namespace Talker;
 
-class Talker
+final class Talker
 {
     /**
      * @var ResourceInterface
@@ -20,35 +20,46 @@ class Talker
     /**
      * @var array
      */
-    private $parsers;
+    private $parser;
 
     public function __construct($resource)
     {
+        if (!get_class($resource)) {
+            throw new \ErrorException("The class defined doesn't exists");
+        }
         $this->resource = $resource;
         $this->resourceMethods = $this->getMethods($resource);
-    }
-
-    public function setParser(ResourceParserInterface $resourceParser)
-    {
-        $this->parsers[] = $resourceParser;
+        $this->parser = new CamelCaseParser();
     }
 
     public function call($phrase)
     {
-        foreach ($this->parsers as $parser) {
-            foreach ($this->resourceMethods as $method) {
-                $parsedMethod = $parser->parse($method->getName());
-                if ($this->guessMatch($phrase, $parsedMethod)) {
+        foreach ($this->resourceMethods as $method) {
+            $parsedMethod = $this->parser->parse($method->getName());
 
-                    return true;
-                }
+            if ($this->guessMatch($phrase, $parsedMethod)) {
+                $parameters = $this->getParametersFromCall($phrase);
+
+                return $this->runMethod($method, $parameters);
             }
         }
 
         return false;
     }
 
-    public function getMethods($resource)
+    public function overrideDefaultParser(ResourceParserInterface $resourceParser)
+    {
+        $this->parser = $resourceParser;
+    }
+
+    protected function runMethod(Method $method, array $parameters)
+    {
+        call_user_func_array(array($this->resource, $method->getName()), $parameters);
+
+        return true;
+    }
+
+    protected function getMethods($resource)
     {
         try {
             $reflection = new \ReflectionClass($resource);
@@ -64,23 +75,41 @@ class Talker
         array_walk(
             $reflectionMethods,
             function (&$v) {
-                $methodClass = new Method();
-                $methodClass->setName($v->getName());
-                foreach ($v->getParameters() as $reflectionParameter) {
-                    $parametersName[] = $reflectionParameter->getName();
-                }
-                $methodClass->setParameters($parametersName);
-                $v = $methodClass;
+                $v = $this->createMethod($v);
             }
         );
 
         return $reflectionMethods;
     }
 
-    private function guessMatch($source, $context)
+    protected function createMethod(\ReflectionMethod $reflectionMethod)
+    {
+        $method = new Method();
+        $method->setName($reflectionMethod->getName());
+        foreach ($reflectionMethod->getParameters() as $reflectionParameter) {
+            $parametersName[] = $reflectionParameter->getName();
+        }
+        $method->setParameters($parametersName);
+
+        return $method;
+    }
+
+    protected function getParametersFromCall($string)
+    {
+        $quotePattern='/"(.*?)"/';
+        preg_match_all($quotePattern, $string, $matches);
+        if (count($matches) < 1) {
+            throw new \ErrorException(sprintf("No parameters found, please check your string call: %s", $string));
+        }
+
+        return $matches[1];
+    }
+
+    protected function guessMatch($source, $context)
     {
         $context = implode(' ', $context);
+        preg_match('/.*'.$context.'.*/', $source, $matches);
 
-        return ($source == $context);
+        return (count($matches) > 0);
     }
 }
