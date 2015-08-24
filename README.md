@@ -1,4 +1,4 @@
-TALKER
-======
+&#9055; Talker Texas Ranger
+===================
 
-Talker allows you to call class method via natural language.
+ Talker Texas Ranger will let your class talk :-)
