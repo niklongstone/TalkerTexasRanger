@@ -1,7 +1,7 @@
 {
   "name": "niklongstone/talker",
   "description": "Talker allows you to call class method via natural language",
-  "keywords": ["narual language", "php", "gherkin", "method", "parser", "regular expression", "regex"],
+  "keywords": ["natural language", "php", "gherkin", "method", "parser", "regular expression", "regex"],
   "homepage": "http://github.com/niklongstone/talker",
   "type": "library",
   "license": "MIT",
