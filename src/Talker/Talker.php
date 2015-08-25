@@ -42,17 +42,14 @@ final class Talker
      */
     public function __construct($resource, $methodNameParser = null, $inputParser = null)
     {
-        if (!get_class($resource)) {
+        try {
+            get_class($resource);
+        }catch(\Exception $e){
             throw new \ErrorException("The class defined doesn't exists");
         }
+        $this->setDefaultParser($methodNameParser, $inputParser);
         $this->resource = $resource;
         $this->resourceMethods = $this->getMethods($resource);
-        if (!$methodNameParser instanceof ResourceParserInterface) {
-            $this->parser = new CamelCaseParser();
-        }
-        if (!$inputParser instanceof ResourceParserInterface) {
-            $this->inputParser = new DoubleQuotesParser();
-        }
     }
 
     /**
@@ -66,15 +63,49 @@ final class Talker
     public function call($phrase)
     {
         foreach ($this->resourceMethods as $method) {
-            $parsedMethod = $this->parser->parse($method->getName());
-            if ($this->guessMatch($phrase, $parsedMethod)) {
-                $parameters = $this->inputParser->parse($phrase);
 
-                return $this->runMethod($method, $parameters);
-            }
+            return $this->runTheMethodForTheGivenPhrase($method, $phrase);
         }
 
-        return false;
+        throw new \ErrorException(sprintf('No method found for the given phrase:"%s"', $phrase));
+    }
+
+    /**
+     * Sets default parsers.
+     *
+     * @param ResourceParserInterface|null $methodNameParser
+     * @param ResourceParserInterface|null $inputParser
+     */
+    private function setDefaultParser($methodNameParser, $inputParser)
+    {
+        if (!$methodNameParser instanceof ResourceParserInterface) {
+            $this->parser = new CamelCaseParser();
+        }
+        if (!$inputParser instanceof ResourceParserInterface) {
+            $this->inputParser = new DoubleQuotesParser();
+        }
+    }
+
+    /**
+     * Runs the Class method according to the given phrase
+     *
+     * @param Method    $method
+     * @param string    $phrase
+     *
+     * @return bool
+     *
+     * @throws \ErrorException
+     */
+    private function runTheMethodForTheGivenPhrase(Method $method, $phrase)
+    {
+        $parsedMethod = $this->parser->parse($method->getName());
+        if ($this->guessMatch($phrase, $parsedMethod)) {
+            $parameters = $this->inputParser->parse($phrase);
+
+            return $this->runMethod($method, $parameters);
+        }
+
+        throw new \ErrorException(sprintf('No method found for the given phrase:"%s"', $phrase));
     }
 
     /**
@@ -98,15 +129,10 @@ final class Talker
      * @param object $resource
      *
      * @return array
-     * @throws \Exception
      */
     private function getMethods($resource)
     {
-        try {
-            $reflection = new \ReflectionClass($resource);
-        } catch (\ReflectionException $e) {
-            throw new \Exception($e->getMessage());
-        }
+        $reflection = new \ReflectionClass($resource);
 
         return $this->getMethodsList($reflection->getMethods());
     }

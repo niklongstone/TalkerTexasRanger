@@ -26,7 +26,7 @@ class InputParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expected \ErrorException
+     * @expectedException \ErrorException
      */
     public function testParseStringWithoutDoubleQuotes()
     {

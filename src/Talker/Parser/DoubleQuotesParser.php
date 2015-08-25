@@ -26,7 +26,7 @@ class DoubleQuotesParser implements ResourceParserInterface
     {
         $quotePattern='/"(.*?)"/';
         preg_match_all($quotePattern, $string, $matches);
-        if (count($matches) < 1) {
+        if (empty($matches[1])) {
             throw new \ErrorException(sprintf("No parameters found, please check your string call: %s", $string));
         }
 

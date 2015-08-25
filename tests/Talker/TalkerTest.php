@@ -12,6 +12,7 @@ namespace Talker\Test;
 
 use Talker\Talker;
 use Talker\Test\Fixtures\TestClass;
+use Talker\Test\Fixtures\TestClassWithNoMethods;
 
 class TalkerTest extends \PHPUnit_Framework_TestCase
 {
@@ -25,5 +26,32 @@ class TalkerTest extends \PHPUnit_Framework_TestCase
         $talker = new Talker(new TestClass());
 
         $this->assertTrue($talker->call('test Method "1" and "2"'));
+    }
+
+    /**
+     * @expectedException \ErrorException
+     */
+    public function testResourceClassNotExist()
+    {
+        new Talker('test');
+    }
+
+    /**
+     * @expectedException \ErrorException
+     */
+    public function testNonExistingMethodPhrase()
+    {
+        $talker = new Talker(new TestClass());
+        $talker->call('test I am not here "1" and "2"');
+    }
+
+    /**
+     * @expectedException \ErrorException
+     */
+    public function testClassWithoutMethods()
+    {
+        $talker = new Talker(new TestClassWithNoMethods());
+
+        $this->assertFalse($talker->call('test I am not here "1" and "2"'));
     }
 }
